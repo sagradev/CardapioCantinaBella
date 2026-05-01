@@ -2,10 +2,10 @@ import { defineConfig } from "astro/config";
 import react from "@astrojs/react";
 import tailwind from "@astrojs/tailwind";
 import node from "@astrojs/node";
+import vercel from "@astrojs/vercel/serverless";
 
 export default defineConfig({
-  output: "server", // SSR obrigatório para buscar dados no servidor
-  adapter: node({ mode: "standalone" }),
+  output: "server",
+  adapter: vercel(),        // ← era node()
   integrations: [react(), tailwind()],
-  server: { port: 4321 },
 });
