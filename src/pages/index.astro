@@ -1,0 +1,81 @@
+---
+import PublicLayout from "../layouts/PublicLayout.astro";
+import MenuGrid from "../components/cardapio/MenuGrid";
+import CartDrawer from "../components/carrinho/CartDrawer";
+import CartButton from "../components/carrinho/CartButton";
+import { getCategorias, getProdutos, getMesaPorToken } from "../lib/api";
+
+// ── Identificar mesa pelo token do QR code ────────────────────────────────────
+// O QR code impresso em cada mesa aponta para /?mesa=<token>
+// O token é validado no backend — o número da mesa vem da resposta da API.
+// NUNCA confiar em um parâmetro "numero=7" vindo do frontend.
+
+const token = Astro.url.searchParams.get("mesa");
+
+let mesa: { id: string; numero: number } | null = null;
+
+if (token) {
+  try {
+    mesa = await getMesaPorToken(token);
+  } catch {
+    // Token inválido — mesa permanece null, sem identificação
+  }
+}
+
+// ── Buscar dados do cardápio no servidor (SSR) ────────────────────────────────
+// Dados chegam prontos no HTML — sem loading flickering no cliente.
+
+let categorias = [];
+let produtos = [];
+
+try {
+  [categorias, produtos] = await Promise.all([
+    getCategorias(),
+    getProdutos(),
+  ]);
+} catch (e) {
+  console.error("Erro ao buscar dados da API:", e);
+}
+---
+
+<PublicLayout
+  title={mesa ? `Mesa ${mesa.numero} — Cantina Bella` : "Cantina Bella"}
+  mesaNumero={mesa?.numero}
+>
+  {
+    categorias.length === 0 ? (
+      <div class="text-center py-20 text-stone-400">
+        <p class="text-4xl mb-3">😕</p>
+        <p class="text-sm">Não foi possível carregar o cardápio.</p>
+        <p class="text-xs mt-1">Tente recarregar a página.</p>
+      </div>
+    ) : (
+      /* MenuGrid é uma ilha React — hidrata no cliente para filtros interativos */
+      <MenuGrid
+        client:visible
+        categorias={categorias}
+        produtos={produtos}
+      />
+    )
+  }
+
+  {
+    mesa ? (
+      /* CartDrawer e CartButton são ilhas — precisam de interatividade */
+      <>
+        <CartDrawer
+          client:load
+          mesaId={mesa.id}
+          mesaNumero={mesa.numero}
+        />
+        <CartButton client:load />
+      </>
+    ) : (
+      <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-30">
+        <div class="bg-amber-100 text-amber-800 text-xs font-medium px-4 py-2.5 rounded-full shadow-md border border-amber-200">
+          📱 Escaneie o QR code da mesa para fazer seu pedido
+        </div>
+      </div>
+    )
+  }
+</PublicLayout>

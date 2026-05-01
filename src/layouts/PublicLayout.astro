@@ -1,0 +1,55 @@
+---
+interface Props {
+  title?: string;
+  mesaNumero?: number;
+}
+
+const { title = "Cantina Bella", mesaNumero } = Astro.props;
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-stone-50 min-h-screen font-[DM_Sans]">
+    <!-- Header -->
+    <header class="bg-[#1a1207] px-5 pt-6 pb-5">
+      <div class="max-w-3xl mx-auto">
+        {
+          mesaNumero && (
+            <span class="inline-flex items-center gap-1.5 text-xs text-amber-600 bg-amber-100 px-2.5 py-1 rounded-full font-medium mb-3">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                <circle cx="5" cy="5" r="4" stroke="currentColor" stroke-width="1.2" />
+                <path d="M5 2.5v2.5l1.5 1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+              </svg>
+              Mesa {mesaNumero}
+            </span>
+          )
+        }
+
+        <h1
+          class="font-['Playfair_Display'] text-2xl font-semibold text-amber-50 mb-1"
+        >
+          Cantina Bella
+        </h1>
+        <p class="text-xs text-stone-500 tracking-widest uppercase">
+          Cozinha italiana artesanal · Desde 1987
+        </p>
+      </div>
+    </header>
+
+    <!-- Conteúdo -->
+    <main class="max-w-3xl mx-auto px-4 py-6 pb-32">
+      <slot />
+    </main>
+  </body>
+</html>
